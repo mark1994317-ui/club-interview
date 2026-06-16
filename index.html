@@ -1,102 +1,122 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="zh-Hant">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2299.77">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026社團聯合招生結果查詢系統</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, "Microsoft JhengHei", "PingFang TC", sans-serif; }
+  .fade-in { animation: fadeIn .4s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+</style>
 </head>
-<body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="zh-Hant"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1">&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1">&lt;title&gt;查詢系統 - 除錯版&lt;/title&gt;</p>
-<p class="p1">&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body class="bg-slate-100 min-h-screen"&gt;</p>
-<p class="p1">&lt;div class="max-w-xl mx-auto px-4 py-8"&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="bg-indigo-600 rounded-2xl shadow-lg p-6 text-center text-white mb-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h1 class="text-xl font-bold"&gt;2026社團聯合招生結果查詢系統&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;p class="text-indigo-100 text-sm mt-1"&gt;除錯模式&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="bg-white rounded-2xl shadow p-6 space-y-4"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;label class="block text-sm font-medium text-slate-700 mb-1"&gt;姓名&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input id="name" type="text" value="陳大文" class="w-full border border-slate-300 rounded-lg px-3 py-2"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;label class="block text-sm font-medium text-slate-700 mb-1"&gt;班別&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input id="cls" type="text" value="1A" class="w-full border border-slate-300 rounded-lg px-3 py-2"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;label class="block text-sm font-medium text-slate-700 mb-1"&gt;電話（8位）&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input id="phone" type="tel" maxlength="8" value="91230001" class="w-full border border-slate-300 rounded-lg px-3 py-2"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;button onclick="doQuery()" class="w-full bg-indigo-600 text-white font-semibold py-2.5 rounded-lg"&gt;測試查詢&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- 除錯輸出區 --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="bg-slate-900 text-green-300 rounded-2xl shadow p-4 mt-4 text-xs font-mono whitespace-pre-wrap break-all" id="debug"&gt;等待測試...&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;script&gt;</p>
-<p class="p1">// ====== 改成你的部署網址 ======</p>
-<p class="p1">const API_URL = "https://script.google.com/macros/s/AKfycbyrjQnCy5l7a3CIWLH9TYDkF-YvUWFXhui25V4n0O6u1l7B1grbCTMQwVWixindXVXnag/exec";</p>
-<p class="p2"><br></p>
-<p class="p1">function log(msg){</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('debug').textContent = msg;</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">async function doQuery(){</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const name = document.getElementById('name').value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const cls<span class="Apple-converted-space">  </span>= document.getElementById('cls').value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const phone= document.getElementById('phone').value.trim();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>if(API_URL.indexOf('http') !== 0){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>log('❌ 錯誤：你還沒有把 API_URL 改成自己的部署網址！\n\n目前 API_URL = ' + API_URL);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>const url = `${API_URL}?phone=${encodeURIComponent(phone)}&amp;name=${encodeURIComponent(name)}&amp;cls=${encodeURIComponent(cls)}`;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>log('🔄 正在連線...\n\n請求網址：\n' + url);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>try{</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const res = await fetch(url);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>log('✅ 連線成功！\nHTTP 狀態：' + res.status + '\n\n正在讀取回應...');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const text = await res.text();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>log('📦 伺服器回傳的原始內容：\n\n' + text + '\n\n──────────\n嘗試解析 JSON...');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>let json;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>try { json = JSON.parse(text); }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>catch(parseErr){</p>
-<p class="p1"><span class="Apple-converted-space">      </span>log('❌ 回傳的不是 JSON（多半是權限頁面或登入頁）\n\n原始內容開頭：\n' + text.substring(0, 300) +</p>
-<p class="p1"><span class="Apple-converted-space">          </span>'\n\n👉 這通常代表部署權限不是「任何人」，或網址用了 /dev 而非 /exec。');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>if(json.success){</p>
-<p class="p1"><span class="Apple-converted-space">      </span>log('🎉 查詢成功！後端與資料都正常！\n\n資料內容：\n' + JSON.stringify(json.data, null, 2) +</p>
-<p class="p1"><span class="Apple-converted-space">          </span>'\n\n👉 後端沒問題，請換回正式版前端即可。');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}else{</p>
-<p class="p1"><span class="Apple-converted-space">      </span>log('⚠️ 連線正常，但後端回覆：「' + json.message + '」\n\n👉 若是「查無資料」，請檢查試算表的姓名/班別/電話是否完全一致。');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}catch(err){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>log('❌ 連線失敗（fetch error）：\n' + err.message +</p>
-<p class="p1"><span class="Apple-converted-space">        </span>'\n\n可能原因：\n1) API_URL 網址打錯\n2) 部署權限不是「任何人」\n3) 尚未重新部署新版本\n4) 此頁面在沙箱預覽中（請存成檔案在瀏覽器開）');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1">}</p>
-<p class="p1">&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+<body class="bg-gradient-to-b from-indigo-50 to-slate-100 min-h-screen">
+<div class="max-w-xl mx-auto px-4 py-8">
+
+  <!-- 標題 -->
+  <div class="bg-indigo-600 rounded-2xl shadow-lg p-6 text-center text-white mb-6">
+    <h1 class="text-xl sm:text-2xl font-bold">2026 社團聯合招生結果查詢</h1>
+    <p class="text-indigo-100 text-sm mt-2">請輸入資料查詢您的錄取結果</p>
+  </div>
+
+  <!-- 查詢表單 -->
+  <div class="bg-white rounded-2xl shadow p-6 space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">姓名</label>
+      <input id="name" type="text" placeholder="請輸入姓名"
+             class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">班別</label>
+      <input id="cls" type="text" placeholder="例如：1A"
+             class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">電話（8 位）</label>
+      <input id="phone" type="tel" maxlength="8" inputmode="numeric" placeholder="8 位數字"
+             class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+    </div>
+    <button id="btn" onclick="doQuery()"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50">
+      查詢結果
+    </button>
+  </div>
+
+  <!-- 結果顯示區 -->
+  <div id="result" class="mt-6"></div>
+
+</div>
+
+<script>
+// ====== 請改成你自己的 Apps Script 部署網址（結尾 /exec）======
+const API_URL = "https://script.google.com/macros/s/AKfycbyrjQnCy5l7a3CIWLH9TYDkF-YvUWFXhui25V4n0O6u1l7B1grbCTMQwVWixindXVXnag/exec";
+
+const $ = id => document.getElementById(id);
+const resultBox = $('result');
+
+function showMsg(html, color){
+  resultBox.innerHTML =
+    `<div class="fade-in bg-white border-l-4 ${color} rounded-xl shadow p-5">${html}</div>`;
+}
+
+async function doQuery(){
+  const name  = $('name').value.trim();
+  const cls   = $('cls').value.trim();
+  const phone = $('phone').value.trim();
+
+  // 基本驗證
+  if(!name || !cls || !phone){
+    showMsg('⚠️ 請完整填寫姓名、班別與電話。', 'border-amber-500');
+    return;
+  }
+  if(!/^\d{8}$/.test(phone)){
+    showMsg('⚠️ 電話必須是 8 位數字。', 'border-amber-500');
+    return;
+  }
+
+  const btn = $('btn');
+  btn.disabled = true;
+  btn.textContent = '查詢中…';
+  showMsg('🔄 正在查詢，請稍候…', 'border-indigo-400');
+
+  const url = `${API_URL}?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}&cls=${encodeURIComponent(cls)}`;
+
+  try{
+    const res = await fetch(url);
+    const json = await res.json();
+
+    if(json.success){
+      renderResult(json.data);
+    }else{
+      showMsg(`😕 查無資料<br><span class="text-sm text-slate-500">${json.message || '請確認輸入的姓名、班別、電話是否正確。'}</span>`, 'border-red-500');
+    }
+  }catch(err){
+    showMsg(`❌ 連線失敗，請稍後再試。<br><span class="text-xs text-slate-400">${err.message}</span>`, 'border-red-500');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '查詢結果';
+  }
+}
+
+// 將後端回傳的資料漂亮地顯示出來（自動列出所有欄位）
+function renderResult(data){
+  let rows = '';
+  for(const key in data){
+    rows += `
+      <div class="flex justify-between py-2 border-b border-slate-100 last:border-0">
+        <span class="text-slate-500 text-sm">${key}</span>
+        <span class="text-slate-800 font-medium text-right">${data[key]}</span>
+      </div>`;
+  }
+  showMsg(`
+    <h2 class="text-lg font-bold text-indigo-700 mb-3">🎉 查詢結果</h2>
+    ${rows}
+  `, 'border-green-500');
+}
+
+// 按 Enter 也能查詢
+document.addEventListener('keydown', e => { if(e.key === 'Enter') doQuery(); });
+</script>
 </body>
 </html>
