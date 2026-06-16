@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社團面試成績查詢系統</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    width: 100%; max-width: 420px;
+    padding: 28px 24px;
+  }
+  h1 { font-size: 1.4rem; color: #333; text-align: center; margin-bottom: 4px; }
+  .sub { text-align: center; color: #888; font-size: 0.85rem; margin-bottom: 20px; }
+  label { display: block; font-size: 0.9rem; color: #555; margin-bottom: 6px; }
+  input[type=text] {
+    width: 100%; padding: 12px; font-size: 1rem;
+    border: 1px solid #ccc; border-radius: 8px; margin-bottom: 14px;
+  }
+  button {
+    width: 100%; padding: 12px; font-size: 1rem; font-weight: bold;
+    color: #fff; background: #667eea; border: none; border-radius: 8px;
+    cursor: pointer; transition: 0.2s;
+  }
+  button:hover { background: #5566d6; }
+  button:disabled { background: #aaa; cursor: not-allowed; }
+  .result { margin-top: 20px; }
+  .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+  .row span:first-child { color: #888; }
+  .row span:last-child { font-weight: bold; color: #333; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.85rem; }
+  .badge.正取 { background: #d4f7dc; color: #1b8a3a; }
+  .badge.備取 { background: #fff3cd; color: #9c6f00; }
+  .badge.未錄取 { background: #f8d7da; color: #b02a37; }
+  .msg { text-align: center; margin-top: 14px; font-size: 0.9rem; }
+  .msg.error { color: #b02a37; }
+  .msg.ok { color: #1b8a3a; }
+  .confirm-box { margin-top: 18px; padding-top: 16px; border-top: 2px dashed #eee; }
+  .confirm-box p { font-size: 0.9rem; color: #555; margin-bottom: 12px; text-align: center; }
+  .btn-group { display: flex; gap: 10px; }
+  .btn-yes { background: #1b8a3a; }
+  .btn-yes:hover { background: #16702f; }
+  .btn-no { background: #b02a37; }
+  .btn-no:hover { background: #8f2029; }
+  .done { text-align: center; color: #1b8a3a; font-weight: bold; margin-top: 16px; }
+  /* 自訂彈窗 */
+  .modal-mask {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-mask.show { display: flex; }
+  .modal {
+    background: #fff; border-radius: 12px; padding: 24px; max-width: 320px; width: 100%;
+    text-align: center;
+  }
+  .modal p { color: #333; margin-bottom: 18px; font-size: 1rem; }
+  .modal .btn-group button { font-size: 0.95rem; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>社團面試成績查詢</h1>
+  <p class="sub">請輸入電話號碼與姓名進行查詢</p>
+
+  <label for="phoneInput">電話號碼</label>
+  <input type="text" id="phoneInput" placeholder="例如：0912345678">
+
+  <label for="nameInput">姓名</label>
+  <input type="text" id="nameInput" placeholder="請輸入報名時的姓名">
+
+  <button id="queryBtn" onclick="doQuery()">查詢</button>
+
+  <div id="result" class="result" style="display:none;"></div>
+  <div id="msg"></div>
+</div>
+
+<!-- 自訂確認彈窗 -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal">
+    <p id="modalText"></p>
+    <div class="btn-group">
+      <button class="btn-yes" id="modalOk">確定</button>
+      <button class="btn-no" id="modalCancel" style="background:#999;">取消</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ⚠️ 換成你自己的 Apps Script 網址
+  const API_URL = "https://script.google.com/macros/s/AKfycbwbbrTmoXekTTyRgzmBTiblqaZujvpHXAoSmHah34KokYUAB-366uhAPWhwh6jSMdX7aw/exec";
+
+  let current = { phone: null, name: null };
+
+  async function doQuery() {
+    const phone = document.getElementById('phoneInput').value.trim();
+    const name = document.getElementById('nameInput').value.trim();
+    const msg = document.getElementById('msg');
+    const result = document.getElementById('result');
+    const btn = document.getElementById('queryBtn');
+    msg.textContent = '';
+    result.style.display = 'none';
+    if (!phone || !name) { showMsg('請輸入電話號碼與姓名', 'error'); return; }
+
+    btn.disabled = true; btn.textContent = '查詢中...';
+    try {
+      const url = `${API_URL}?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      if (!json.success) { showMsg(json.message, 'error'); return; }
+      current = { phone, name };
+      renderResult(json.data);
+    } catch (e) {
+      showMsg('連線失敗，請稍後再試', 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = '查詢';
+    }
+  }
+
+  function renderResult(d) {
+    const result = document.getElementById('result');
+    let html = `
+      <div class="row"><span>姓名</span><span>${d.name}</span></div>
+      <div class="row"><span>面試成績</span><span>${d.score}</span></div>
+      <div class="row"><span>錄取狀態</span><span class="badge ${d.status}">${d.status}</span></div>
+    `;
+
+    if (d.confirmed) {
+      html += `<div class="done">✔ 你已於 ${d.confirmTime} 完成確認<br>結果：${d.confirmed}</div>`;
+    } else if (d.status === '正取' || d.status === '備取') {
+      html += `
+        <div class="confirm-box">
+          <p>請確認是否接受錄取資格（送出後無法修改）</p>
+          <div class="btn-group">
+            <button class="btn-yes" onclick="askConfirm('接受')">接受錄取</button>
+            <button class="btn-no" onclick="askConfirm('放棄')">放棄資格</button>
+          </div>
+        </div>`;
+    }
+    result.innerHTML = html;
+    result.style.display = 'block';
+  }
+
+  // 自訂彈窗確認
+  function askConfirm(choice) {
+    const mask = document.getElementById('modalMask');
+    document.getElementById('modalText').textContent = `確定要「${choice}」嗎？送出後無法修改。`;
+    mask.classList.add('show');
+    document.getElementById('modalOk').onclick = () => {
+      mask.classList.remove('show');
+      doConfirm(choice);
+    };
+    document.getElementById('modalCancel').onclick = () => mask.classList.remove('show');
+  }
+
+  async function doConfirm(choice) {
+    showMsg('送出中...', 'ok');
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // 避免 CORS 預檢
+        body: JSON.stringify({
+          action: 'confirm',
+          phone: current.phone,
+          name: current.name,
+          choice
+        })
+      });
+      const json = await res.json();
+      showMsg(json.message, json.success ? 'ok' : 'error');
+      if (json.success) doQuery(); // 重新整理顯示
+    } catch (e) {
+      showMsg('送出失敗，請稍後再試', 'error');
+    }
+  }
+
+  function showMsg(text, type) {
+    const msg = document.getElementById('msg');
+    msg.textContent = text;
+    msg.className = 'msg ' + type;
+  }
+</script>
+</body>
+</html>
