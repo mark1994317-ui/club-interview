@@ -1,236 +1,102 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026社團聯合招生結果查詢系統</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2299.77">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
 </head>
-<body class="bg-slate-100 min-h-screen">
-
-<div class="max-w-xl mx-auto px-4 py-8">
-
-  <!-- 標題 -->
-  <div class="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl shadow-lg p-6 text-center text-white mb-6">
-    <h1 class="text-xl sm:text-2xl font-bold leading-snug">2026社團聯合招生<br class="sm:hidden">結果查詢系統</h1>
-    <p class="text-indigo-100 text-sm mt-2">共五個社團 · 請輸入資料查詢你的錄取結果</p>
-  </div>
-
-  <!-- 查詢表單 -->
-  <div id="loginCard" class="bg-white rounded-2xl shadow p-6">
-    <div class="space-y-4">
-      <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">姓名</label>
-        <input id="name" type="text" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="請輸入姓名">
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">班別</label>
-        <input id="cls" type="text" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例如：1A">
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">登記電話號碼（8位）</label>
-        <input id="phone" type="tel" inputmode="numeric" maxlength="8" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="請輸入8位數字">
-      </div>
-      <p id="loginErr" class="text-red-500 text-sm hidden"></p>
-      <button id="queryBtn" onclick="doQuery()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition">查詢結果</button>
-    </div>
-  </div>
-
-  <!-- 結果區 -->
-  <div id="resultCard" class="hidden"></div>
-
-</div>
-
-<script>
-// ====== 請改成你的部署網址 ======
-const API_URL = "https://script.google.com/macros/s/AKfycbyrjQnCy5l7a3CIWLH9TYDkF-YvUWFXhui25V4n0O6u1l7B1grbCTMQwVWixindXVXnag/exec";
-
-let current = null;
-
-function showLoginErr(msg){
-  const el = document.getElementById('loginErr');
-  el.textContent = msg; el.classList.remove('hidden');
-}
-
-async function doQuery(){
-  const name = document.getElementById('name').value.trim();
-  const cls  = document.getElementById('cls').value.trim();
-  const phone= document.getElementById('phone').value.trim();
-  document.getElementById('loginErr').classList.add('hidden');
-
-  if(!name || !cls || !phone){ showLoginErr('請填寫完整的姓名、班別與電話號碼'); return; }
-  if(!/^\d{8}$/.test(phone)){ showLoginErr('電話號碼必須為8位數字'); return; }
-
-  const btn = document.getElementById('queryBtn');
-  btn.disabled = true; btn.textContent = '查詢中...';
-
-  try{
-    const url = `${API_URL}?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}&cls=${encodeURIComponent(cls)}`;
-    const res = await fetch(url);
-    const json = await res.json();
-    if(!json.success){ showLoginErr(json.message); return; }
-    current = { phone, name, cls, data: json.data };
-    renderResult();
-  }catch(e){
-    showLoginErr('連線失敗，請稍後再試');
-  }finally{
-    btn.disabled = false; btn.textContent = '查詢結果';
-  }
-}
-
-function renderResult(){
-  const d = current.data;
-  document.getElementById('loginCard').classList.add('hidden');
-  const card = document.getElementById('resultCard');
-  card.classList.remove('hidden');
-
-  // 頂部：姓名 + 班別
-  let head = `
-    <div class="bg-white rounded-2xl shadow p-6 mb-4">
-      <div class="flex justify-between items-center">
-        <div>
-          <p class="text-xs text-slate-400">姓名</p>
-          <p class="text-lg font-bold text-slate-800">${escapeHtml(d.name)}</p>
-        </div>
-        <div class="text-right">
-          <p class="text-xs text-slate-400">班別</p>
-          <p class="text-lg font-bold text-slate-800">${escapeHtml(d.cls)}</p>
-        </div>
-      </div>
-    </div>`;
-
-  // 各社團獨立結果
-  let regHtml = d.registrations.map(r => regRow(r)).join('');
-  let regBlock = `
-    <div class="bg-white rounded-2xl shadow p-6 mb-4">
-      <p class="text-sm font-semibold text-slate-500 mb-3">你報名的社團結果（共 ${d.registrations.length} 個）</p>
-      <div class="space-y-2">${regHtml}</div>
-    </div>`;
-
-  // 確認區
-  let confirmBlock = renderConfirmArea(d);
-
-  card.innerHTML = head + regBlock + confirmBlock +
-    `<button onclick="backToLogin()" class="w-full mt-4 text-slate-500 hover:text-slate-700 text-sm py-2">← 返回重新查詢</button>`;
-}
-
-// 單一社團結果列
-function regRow(r){
-  const map = {
-    '入選':  ['🎉 入選','bg-green-100 text-green-700'],
-    '候補':  ['⏳ 候補','bg-amber-100 text-amber-700'],
-    '未錄取':['📋 未錄取','bg-slate-200 text-slate-600']
-  };
-  const [txt, cls] = map[r.result] || [r.result,'bg-slate-200 text-slate-600'];
-  const pos = (r.result === '入選' && r.position)
-    ? `<span class="text-sm text-slate-500 ml-2">職位：${escapeHtml(r.position)}</span>` : '';
-  return `
-    <div class="flex items-center justify-between border border-slate-100 rounded-lg px-4 py-3">
-      <div>
-        <span class="font-medium text-slate-800">${escapeHtml(r.club)}</span>${pos}
-      </div>
-      <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold ${cls}">${txt}</span>
-    </div>`;
-}
-
-// 確認區邏輯
-function renderConfirmArea(d){
-  const selected = d.registrations.filter(r => r.result === '入選');
-
-  // 沒有入選任何社團 → 不需確認
-  if(selected.length === 0){
-    return `
-      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center text-sm text-slate-500">
-        你沒有入選的社團，無需進行確認。${d.registrations.some(r=>r.result==='候補') ? '候補社團如有名額釋出將另行通知。' : ''}
-      </div>`;
-  }
-
-  // 已確認過
-  if(d.confirmed && d.confirmed.length){
-    let items = d.confirmed.map(c =>
-      `<li class="flex justify-between bg-green-50 border border-green-200 rounded-lg px-4 py-2">
-         <span class="font-medium text-slate-800">${escapeHtml(c.club)}</span>
-         <span class="text-green-700 text-sm">${escapeHtml(c.position)}</span>
-       </li>`).join('');
-    return `
-      <div class="bg-white rounded-2xl shadow p-6">
-        <p class="font-semibold text-green-700 mb-3">✅ 你已完成確認</p>
-        <ul class="space-y-2">${items}</ul>
-        ${d.confirmTime ? `<p class="text-xs text-slate-400 mt-3">確認時間：${escapeHtml(d.confirmTime)}</p>`:''}
-      </div>`;
-  }
-
-  // 尚未確認 → 在入選社團中勾選
-  const max = d.maxSelectable;
-  let note = selected.length > 3
-    ? `你共入選 <b>${selected.length}</b> 個社團，依規定<b class="text-indigo-600">最多只能選擇 2 個</b>。`
-    : `你共入選 <b>${selected.length}</b> 個社團，請勾選你要加入的社團（最多 ${max} 個）。`;
-
-  let items = selected.map(c =>
-    `<label class="flex items-center justify-between border border-slate-200 rounded-lg px-4 py-3 cursor-pointer hover:bg-indigo-50">
-       <span>
-         <span class="font-medium text-slate-800">${escapeHtml(c.club)}</span>
-         <span class="text-sm text-slate-500 ml-2">${escapeHtml(c.position)}</span>
-       </span>
-       <input type="checkbox" class="clubChk w-5 h-5 accent-indigo-600" value="${escapeHtml(c.club)}" onchange="onCheck()">
-     </label>`).join('');
-
-  return `
-    <div class="bg-white rounded-2xl shadow p-6">
-      <p class="text-sm font-semibold text-slate-700 mb-1">入選社團確認</p>
-      <p class="text-sm text-slate-600 mb-3">${note}</p>
-      <div class="space-y-2 mb-4">${items}</div>
-      <p id="confirmErr" class="text-red-500 text-sm mb-2 hidden"></p>
-      <button id="confirmBtn" onclick="submitConfirm(${max})" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition">送出確認</button>
-      <p class="text-xs text-slate-400 mt-3 text-center">⚠️ 確認後無法修改，請謹慎選擇</p>
-    </div>`;
-}
-
-function onCheck(){
-  const max = current.data.maxSelectable;
-  const chks = [...document.querySelectorAll('.clubChk')];
-  const checked = chks.filter(c=>c.checked).length;
-  chks.forEach(c=>{ c.disabled = (!c.checked && checked >= max); });
-}
-
-async function submitConfirm(max){
-  const chks = [...document.querySelectorAll('.clubChk')];
-  const choices = chks.filter(c=>c.checked).map(c=>c.value);
-  const err = document.getElementById('confirmErr');
-  err.classList.add('hidden');
-
-  if(choices.length === 0){ err.textContent='請至少選擇一個社團'; err.classList.remove('hidden'); return; }
-  if(choices.length > max){ err.textContent=`最多只能選擇 ${max} 個社團`; err.classList.remove('hidden'); return; }
-
-  const btn = document.getElementById('confirmBtn');
-  btn.disabled = true; btn.textContent='送出中...';
-
-  try{
-    const res = await fetch(API_URL, {
-      method:'POST',
-      body: JSON.stringify({
-        action:'confirm',
-        phone: current.phone, name: current.name, cls: current.cls,
-        choices: choices
-      })
-    });
-    const json = await res.json();
-    if(!json.success){ err.textContent=json.message; err.classList.remove('hidden'); btn.disabled=false; btn.textContent='送出確認'; return; }
-    await doQuery();
-  }catch(e){
-    err.textContent='連線失敗，請稍後再試'; err.classList.remove('hidden');
-    btn.disabled=false; btn.textContent='送出確認';
-  }
-}
-
-function backToLogin(){
-  document.getElementById('resultCard').classList.add('hidden');
-  document.getElementById('loginCard').classList.remove('hidden');
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-</script>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="zh-Hant"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1">&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1">&lt;title&gt;查詢系統 - 除錯版&lt;/title&gt;</p>
+<p class="p1">&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="bg-slate-100 min-h-screen"&gt;</p>
+<p class="p1">&lt;div class="max-w-xl mx-auto px-4 py-8"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="bg-indigo-600 rounded-2xl shadow-lg p-6 text-center text-white mb-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;h1 class="text-xl font-bold"&gt;2026社團聯合招生結果查詢系統&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;p class="text-indigo-100 text-sm mt-1"&gt;除錯模式&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="bg-white rounded-2xl shadow p-6 space-y-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;label class="block text-sm font-medium text-slate-700 mb-1"&gt;姓名&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;input id="name" type="text" value="陳大文" class="w-full border border-slate-300 rounded-lg px-3 py-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;label class="block text-sm font-medium text-slate-700 mb-1"&gt;班別&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;input id="cls" type="text" value="1A" class="w-full border border-slate-300 rounded-lg px-3 py-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;label class="block text-sm font-medium text-slate-700 mb-1"&gt;電話（8位）&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;input id="phone" type="tel" maxlength="8" value="91230001" class="w-full border border-slate-300 rounded-lg px-3 py-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button onclick="doQuery()" class="w-full bg-indigo-600 text-white font-semibold py-2.5 rounded-lg"&gt;測試查詢&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- 除錯輸出區 --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="bg-slate-900 text-green-300 rounded-2xl shadow p-4 mt-4 text-xs font-mono whitespace-pre-wrap break-all" id="debug"&gt;等待測試...&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1">// ====== 改成你的部署網址 ======</p>
+<p class="p1">const API_URL = "https://script.google.com/macros/s/AKfycbyrjQnCy5l7a3CIWLH9TYDkF-YvUWFXhui25V4n0O6u1l7B1grbCTMQwVWixindXVXnag/exec";</p>
+<p class="p2"><br></p>
+<p class="p1">function log(msg){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('debug').textContent = msg;</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">async function doQuery(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const name = document.getElementById('name').value.trim();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const cls<span class="Apple-converted-space">  </span>= document.getElementById('cls').value.trim();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const phone= document.getElementById('phone').value.trim();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(API_URL.indexOf('http') !== 0){</p>
+<p class="p1"><span class="Apple-converted-space">    </span>log('❌ 錯誤：你還沒有把 API_URL 改成自己的部署網址！\n\n目前 API_URL = ' + API_URL);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const url = `${API_URL}?phone=${encodeURIComponent(phone)}&amp;name=${encodeURIComponent(name)}&amp;cls=${encodeURIComponent(cls)}`;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>log('🔄 正在連線...\n\n請求網址：\n' + url);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>try{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const res = await fetch(url);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>log('✅ 連線成功！\nHTTP 狀態：' + res.status + '\n\n正在讀取回應...');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const text = await res.text();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>log('📦 伺服器回傳的原始內容：\n\n' + text + '\n\n──────────\n嘗試解析 JSON...');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>let json;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>try { json = JSON.parse(text); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>catch(parseErr){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>log('❌ 回傳的不是 JSON（多半是權限頁面或登入頁）\n\n原始內容開頭：\n' + text.substring(0, 300) +</p>
+<p class="p1"><span class="Apple-converted-space">          </span>'\n\n👉 這通常代表部署權限不是「任何人」，或網址用了 /dev 而非 /exec。');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(json.success){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>log('🎉 查詢成功！後端與資料都正常！\n\n資料內容：\n' + JSON.stringify(json.data, null, 2) +</p>
+<p class="p1"><span class="Apple-converted-space">          </span>'\n\n👉 後端沒問題，請換回正式版前端即可。');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}else{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>log('⚠️ 連線正常，但後端回覆：「' + json.message + '」\n\n👉 若是「查無資料」，請檢查試算表的姓名/班別/電話是否完全一致。');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}catch(err){</p>
+<p class="p1"><span class="Apple-converted-space">    </span>log('❌ 連線失敗（fetch error）：\n' + err.message +</p>
+<p class="p1"><span class="Apple-converted-space">        </span>'\n\n可能原因：\n1) API_URL 網址打錯\n2) 部署權限不是「任何人」\n3) 尚未重新部署新版本\n4) 此頁面在沙箱預覽中（請存成檔案在瀏覽器開）');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1">}</p>
+<p class="p1">&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
 </body>
 </html>
